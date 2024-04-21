@@ -5,8 +5,9 @@ use anyhow::Result;
 use clap::Parser;
 
 #[derive(Debug, Parser)]
+#[command(author, version, about)]
 struct Args {
-    /// The file(s) to open, uses STDOUT if none supplied
+    /// The file(s) to open, uses STDIN if none supplied
     #[arg(default_value="-")]
     files: Vec<String>,
     /// Number each line
