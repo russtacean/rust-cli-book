@@ -22,28 +22,10 @@ struct Args {
 }
 
 fn run(args: Args) -> Result<()> {
-    for filename in args.files {
+    for filename in &args.files {
         match open(&filename) {
             Err(err) => eprintln!("Failed to open {filename}: {err}"),
-            Ok(file) => {
-                let mut line_num = 0;
-                for line_result in file.lines() {
-                    let line = line_result?;
-                    line_num += 1;
-                    
-                    if line == "" && args.number_nonblank_lines {
-                        line_num -= 1;
-                        println!();
-                        continue
-                    }
-
-                    if args.number_lines || args.number_nonblank_lines{
-                        println!("{line_num:>6}\t{line}")
-                    } else {
-                        println!("{line}")
-                    }
-                }
-            },
+            Ok(file) => readFile(file, &args)?
         }
     }
     Ok(())
@@ -54,6 +36,27 @@ fn open(filename: &str) -> Result<Box<dyn BufRead>> {
         "-" => Ok(Box::new(BufReader::new(io::stdin()))),
         _ => Ok(Box::new(BufReader::new(File::open(filename)?))),
     }
+}
+
+fn readFile(file: Box<dyn BufRead>, args: &Args) -> Result<()>{
+    let mut line_num = 0;
+    for line_result in file.lines() {
+        let line = line_result?;
+        line_num += 1;
+
+        if line == "" && args.number_nonblank_lines {
+            line_num -= 1;
+            println!();
+            continue
+        }
+
+        if args.number_lines || args.number_nonblank_lines{
+            println!("{line_num:>6}\t{line}")
+        } else {
+            println!("{line}")
+        }
+    }
+    Ok(())
 }
 
 fn main() {
